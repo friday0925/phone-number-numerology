@@ -462,6 +462,7 @@ class PhoneNumerology:
     def recommend_numbers(self, count=10):
         """
         根據出生日期推薦適合的電話號碼組合
+        真正基於個人出生日期產生個性化推薦
         
         Args:
             count: 推薦的組合數量
@@ -483,76 +484,171 @@ class PhoneNumerology:
         birth_stem = heavenly_stems[year_index]
         birth_element = elements_map[birth_stem]
         
-        # 五行對應的吉利數字
+        # 五行對應的吉利數字 (優先順序排序)
         element_lucky_digits = {
-            '金': ['7', '8', '4', '9'],  # 金生水,土生金
-            '木': ['1', '2', '3', '8'],  # 木生火,水生木
-            '水': ['9', '0', '1', '7'],  # 水生木,金生水
-            '火': ['3', '4', '2', '1'],  # 火生土,木生火
-            '土': ['5', '6', '9', '3']   # 土生金,火生土
+            '金': ['7', '8', '9', '0', '4', '5'],  # 金生水,土生金,本命金
+            '木': ['1', '2', '3', '4', '9', '0'],  # 木生火,水生木,本命木
+            '水': ['9', '0', '1', '2', '7', '8'],  # 水生木,金生水,本命水
+            '火': ['3', '4', '1', '2', '5', '6'],  # 火生土,木生火,本命火
+            '土': ['5', '6', '3', '4', '9', '0']   # 土生金,火生土,本命土
         }
         
         lucky_digits = element_lucky_digits.get(birth_element, ['1', '3', '5', '7', '9'])
         
-        # 吉星磁場組合
+        # 根據出生月日計算個人幸運數字
+        personal_lucky_digit = str((self.birth_month + self.birth_day) % 10)
+        
+        # 根據出生年計算次要幸運數字
+        secondary_lucky_digit = str(sum(int(d) for d in str(self.birth_year)) % 10)
+        
+        # 吉星磁場組合 (按五行相容性排序)
         lucky_pairs = []
-        for field_name, field_info in self.MAGNETIC_FIELDS.items():
-            if field_info['type'] == 'lucky':
-                lucky_pairs.extend(field_info['pairs'])
+        for field_name in ['天醫', '生氣', '延年']:  # 只使用吉星
+            field_info = self.MAGNETIC_FIELDS[field_name]
+            lucky_pairs.extend(field_info['pairs'])
+        
+        # 根據五行篩選最適合的磁場組合
+        element_compatible_pairs = []
+        for pair in lucky_pairs:
+            # 檢查組合中是否包含五行吉利數字
+            if any(d in pair for d in lucky_digits[:3]):  # 使用前3個最吉利的數字
+                element_compatible_pairs.append(pair)
         
         # 生成推薦組合
         recommendations = []
-        
-        # 策略1: 使用吉星磁場組合
-        for pair in lucky_pairs[:15]:
-            combo = {
-                'pattern': pair,
-                'type': '吉星磁場',
-                'reason': f'包含{self._get_field_name(pair)}磁場',
-                'score': 90
-            }
-            recommendations.append(combo)
-        
-        # 策略2: 使用五行吉利數字
-        import random
-        for _ in range(10):
-            digits = random.choices(lucky_digits, k=2)
-            pattern = ''.join(digits)
-            combo = {
-                'pattern': pattern,
-                'type': '五行相生',
-                'reason': f'適合{birth_element}命',
-                'score': 85
-            }
-            recommendations.append(combo)
-        
-        # 策略3: 大吉靈動數對應
-        lucky_lingdong = [1, 3, 5, 11, 13, 15, 16, 21, 23, 24, 31, 32, 33, 41, 45, 47, 65, 67, 81]
-        for ld in lucky_lingdong[:10]:
-            # 將靈動數轉換為4位數字
-            base = (ld * 80) % 10000
-            if base < 1000:
-                base += 1000
-            pattern = str(base)[-4:]
-            combo = {
-                'pattern': pattern,
-                'type': '靈動大吉',
-                'reason': f'靈動數{ld}(大吉)',
-                'score': 88
-            }
-            recommendations.append(combo)
-        
-        # 去重並排序
         seen = set()
-        unique_recommendations = []
-        for rec in recommendations:
-            if rec['pattern'] not in seen:
-                seen.add(rec['pattern'])
-                unique_recommendations.append(rec)
+        
+        # 策略1: 個人專屬組合 (基於出生月日)
+        personal_combos = [
+            personal_lucky_digit + secondary_lucky_digit,
+            secondary_lucky_digit + personal_lucky_digit,
+            personal_lucky_digit + lucky_digits[0],
+            lucky_digits[0] + personal_lucky_digit,
+            personal_lucky_digit * 2,  # 重複數字
+        ]
+        
+        for combo in personal_combos:
+            if combo not in seen and len(combo) == 2:
+                seen.add(combo)
+                # 檢查是否為吉星磁場
+                field_name = self._get_field_name(combo)
+                if field_name in ['天醫', '生氣', '延年']:
+                    reason = f'個人專屬組合 + {field_name}磁場'
+                    score = 95
+                else:
+                    reason = f'個人專屬組合 (基於{self.birth_month}月{self.birth_day}日)'
+                    score = 88
+                
+                recommendations.append({
+                    'pattern': combo,
+                    'type': '個人專屬',
+                    'reason': reason,
+                    'score': score
+                })
+        
+        # 策略2: 五行相容的吉星磁場
+        for pair in element_compatible_pairs[:8]:
+            if pair not in seen:
+                seen.add(pair)
+                field_name = self._get_field_name(pair)
+                recommendations.append({
+                    'pattern': pair,
+                    'type': '吉星磁場',
+                    'reason': f'{field_name}磁場 + 適合{birth_element}命',
+                    'score': 92
+                })
+        
+        # 策略3: 五行最吉利數字組合
+        for i in range(min(3, len(lucky_digits))):
+            for j in range(min(3, len(lucky_digits))):
+                combo = lucky_digits[i] + lucky_digits[j]
+                if combo not in seen:
+                    seen.add(combo)
+                    field_name = self._get_field_name(combo)
+                    if field_name in ['天醫', '生氣', '延年']:
+                        reason = f'五行相生 + {field_name}磁場'
+                        score = 90
+                    else:
+                        reason = f'五行相生數字 (適合{birth_element}命)'
+                        score = 85
+                    
+                    recommendations.append({
+                        'pattern': combo,
+                        'type': '五行相生',
+                        'reason': reason,
+                        'score': score
+                    })
+        
+        # 策略4: 基於出生年的靈動數組合
+        # 使用出生年的數字來計算對應的靈動數
+        year_sum = sum(int(d) for d in str(self.birth_year))
+        target_lingdong = year_sum % 81
+        if target_lingdong == 0:
+            target_lingdong = 81
+        
+        # 找出接近的大吉靈動數
+        lucky_lingdong = [1, 3, 5, 11, 13, 15, 16, 21, 23, 24, 31, 32, 33, 41, 45, 47, 65, 67, 81]
+        closest_lingdong = min(lucky_lingdong, key=lambda x: abs(x - target_lingdong))
+        
+        # 生成對應的4位數組合
+        for offset in [0, 80, 160, 240]:
+            base = closest_lingdong + offset
+            if base > 9999:
+                break
+            pattern = str(base).zfill(4)[-4:]
+            if pattern[:2] not in seen:
+                seen.add(pattern[:2])
+                recommendations.append({
+                    'pattern': pattern[:2],
+                    'type': '靈動大吉',
+                    'reason': f'對應靈動數{closest_lingdong} (基於{self.birth_year}年)',
+                    'score': 87
+                })
+        
+        # 策略5: 生日數字組合
+        birth_digits = [str(self.birth_month // 10), str(self.birth_month % 10),
+                       str(self.birth_day // 10), str(self.birth_day % 10)]
+        birth_digits = [d for d in birth_digits if d != '0']  # 移除0
+        
+        if len(birth_digits) >= 2:
+            for i in range(min(2, len(birth_digits))):
+                for j in range(min(2, len(birth_digits))):
+                    if i != j:
+                        combo = birth_digits[i] + birth_digits[j]
+                        if combo not in seen:
+                            seen.add(combo)
+                            field_name = self._get_field_name(combo)
+                            if field_name in ['天醫', '生氣', '延年']:
+                                reason = f'生日數字 + {field_name}磁場'
+                                score = 89
+                            else:
+                                reason = f'生日數字組合 ({self.birth_month}/{self.birth_day})'
+                                score = 82
+                            
+                            recommendations.append({
+                                'pattern': combo,
+                                'type': '生日數字',
+                                'reason': reason,
+                                'score': score
+                            })
         
         # 按分數排序並返回指定數量
-        unique_recommendations.sort(key=lambda x: x['score'], reverse=True)
-        return unique_recommendations[:count]
+        recommendations.sort(key=lambda x: x['score'], reverse=True)
+        
+        # 確保返回的數量足夠,如果不夠則補充其他吉星組合
+        if len(recommendations) < count:
+            for pair in lucky_pairs:
+                if pair not in seen and len(recommendations) < count:
+                    seen.add(pair)
+                    field_name = self._get_field_name(pair)
+                    recommendations.append({
+                        'pattern': pair,
+                        'type': '吉星磁場',
+                        'reason': f'{field_name}磁場',
+                        'score': 85
+                    })
+        
+        return recommendations[:count]
     
     def _get_field_name(self, pair):
         """獲取數字對應的磁場名稱"""
