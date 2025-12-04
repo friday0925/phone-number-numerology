@@ -458,6 +458,108 @@ class PhoneNumerology:
 """
         
         return report
+    
+    def recommend_numbers(self, count=10):
+        """
+        根據出生日期推薦適合的電話號碼組合
+        
+        Args:
+            count: 推薦的組合數量
+            
+        Returns:
+            推薦的數字組合列表
+        """
+        # 計算五行
+        heavenly_stems = ['庚', '辛', '壬', '癸', '甲', '乙', '丙', '丁', '戊', '己']
+        elements_map = {
+            '庚': '金', '辛': '金',
+            '壬': '水', '癸': '水',
+            '甲': '木', '乙': '木',
+            '丙': '火', '丁': '火',
+            '戊': '土', '己': '土'
+        }
+        
+        year_index = (self.birth_year - 4) % 10
+        birth_stem = heavenly_stems[year_index]
+        birth_element = elements_map[birth_stem]
+        
+        # 五行對應的吉利數字
+        element_lucky_digits = {
+            '金': ['7', '8', '4', '9'],  # 金生水,土生金
+            '木': ['1', '2', '3', '8'],  # 木生火,水生木
+            '水': ['9', '0', '1', '7'],  # 水生木,金生水
+            '火': ['3', '4', '2', '1'],  # 火生土,木生火
+            '土': ['5', '6', '9', '3']   # 土生金,火生土
+        }
+        
+        lucky_digits = element_lucky_digits.get(birth_element, ['1', '3', '5', '7', '9'])
+        
+        # 吉星磁場組合
+        lucky_pairs = []
+        for field_name, field_info in self.MAGNETIC_FIELDS.items():
+            if field_info['type'] == 'lucky':
+                lucky_pairs.extend(field_info['pairs'])
+        
+        # 生成推薦組合
+        recommendations = []
+        
+        # 策略1: 使用吉星磁場組合
+        for pair in lucky_pairs[:15]:
+            combo = {
+                'pattern': pair,
+                'type': '吉星磁場',
+                'reason': f'包含{self._get_field_name(pair)}磁場',
+                'score': 90
+            }
+            recommendations.append(combo)
+        
+        # 策略2: 使用五行吉利數字
+        import random
+        for _ in range(10):
+            digits = random.choices(lucky_digits, k=2)
+            pattern = ''.join(digits)
+            combo = {
+                'pattern': pattern,
+                'type': '五行相生',
+                'reason': f'適合{birth_element}命',
+                'score': 85
+            }
+            recommendations.append(combo)
+        
+        # 策略3: 大吉靈動數對應
+        lucky_lingdong = [1, 3, 5, 11, 13, 15, 16, 21, 23, 24, 31, 32, 33, 41, 45, 47, 65, 67, 81]
+        for ld in lucky_lingdong[:10]:
+            # 將靈動數轉換為4位數字
+            base = (ld * 80) % 10000
+            if base < 1000:
+                base += 1000
+            pattern = str(base)[-4:]
+            combo = {
+                'pattern': pattern,
+                'type': '靈動大吉',
+                'reason': f'靈動數{ld}(大吉)',
+                'score': 88
+            }
+            recommendations.append(combo)
+        
+        # 去重並排序
+        seen = set()
+        unique_recommendations = []
+        for rec in recommendations:
+            if rec['pattern'] not in seen:
+                seen.add(rec['pattern'])
+                unique_recommendations.append(rec)
+        
+        # 按分數排序並返回指定數量
+        unique_recommendations.sort(key=lambda x: x['score'], reverse=True)
+        return unique_recommendations[:count]
+    
+    def _get_field_name(self, pair):
+        """獲取數字對應的磁場名稱"""
+        for field_name, field_info in self.MAGNETIC_FIELDS.items():
+            if pair in field_info['pairs']:
+                return field_name
+        return '未知'
 
 
 def main():
