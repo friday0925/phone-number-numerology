@@ -19,7 +19,28 @@ python -m playwright install chromium
 
 ## 使用方法
 
-### 方法一: 網頁介面 (推薦) 🌐
+### 🌟 方法一: Streamlit Cloud (推薦 - 線上使用)
+
+**最簡單的方式 - 無需安裝,直接使用!**
+
+1. **訪問線上應用**: https://phone-number-numerology.streamlit.app
+2. **輸入資料**: 手機號碼和出生年月日
+3. **立即分析**: 點擊按鈕即可獲得結果
+
+**自行部署到 Streamlit Cloud**:
+```bash
+# 1. 上傳 streamlit_app.py 到 GitHub
+# 2. 前往 https://streamlit.io/cloud
+# 3. 連接 GitHub repository
+# 4. 選擇 streamlit_app.py
+# 5. 點擊 Deploy!
+```
+
+詳細步驟請參考: [STREAMLIT_DEPLOYMENT.md](STREAMLIT_DEPLOYMENT.md)
+
+---
+
+### 方法二: 網頁介面 (本地使用) 🌐
 
 最簡單的使用方式!
 
