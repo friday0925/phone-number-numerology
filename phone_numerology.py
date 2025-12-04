@@ -148,15 +148,21 @@ class PhoneNumerology:
         81: {'type': '大吉', 'meaning': '萬物回春,還原復始', 'score': 10}
     }
     
-    def __init__(self, birthdate: str = "1990/09/25"):
+    def __init__(self, birthdate: str):
         """
         初始化分析器
         
         Args:
             birthdate: 出生日期，格式為 YYYY/MM/DD
         """
+        if not birthdate:
+            raise ValueError("必須提供出生日期")
+            
         self.birthdate = birthdate
-        self.birth_year, self.birth_month, self.birth_day = map(int, birthdate.split('/'))
+        try:
+            self.birth_year, self.birth_month, self.birth_day = map(int, birthdate.split('/'))
+        except ValueError:
+            raise ValueError("出生日期格式錯誤，應為 YYYY/MM/DD")
     
     def analyze_magnetic_fields(self, phone_number: str) -> Dict:
         """
