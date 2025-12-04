@@ -48,7 +48,7 @@ def run():
                 page.click('text=後六碼')
                 
                 # Input "??9196" into the text field
-                page.fill('input[name="tel"]', '??9196')
+                page.fill('input[name="tel"]', '??4196')
                 
                 # Click Search (Submit)
                 with page.expect_navigation(timeout=60000):

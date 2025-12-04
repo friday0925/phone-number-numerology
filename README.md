@@ -19,6 +19,29 @@ python -m playwright install chromium
 
 ## 使用方法
 
+### 方法一: 網頁介面 (推薦) 🌐
+
+最簡單的使用方式!
+
+**步驟 1: 啟動後端服務**
+```bash
+python app.py
+```
+
+**步驟 2: 開啟網頁**
+在瀏覽器中開啟 `index.html` 或訪問 `http://localhost:5000`
+
+**步驟 3: 輸入資料**
+- 輸入手機號碼 (例: 0978-759-196)
+- 輸入出生年月日 (例: 1990/09/25)
+- 點擊「開始分析」
+
+分析結果會即時顯示在網頁上! ✨
+
+---
+
+### 方法二: 命令列工具
+
 ### 1. 搜尋電話號碼
 
 ```bash
@@ -29,29 +52,38 @@ python cht_crawler.py
 
 ### 2. 分析找到的號碼
 
+**基本用法** (使用預設出生日期 1990/09/25):
 ```bash
 python analyze_results.py
 ```
 
-這會分析所有找到的號碼,並生成:
-- 螢幕上顯示排名和前3名的詳細分析
-- `analysis_report.txt` 包含完整的分析報告
-
-**進階用法 - 使用命令列參數**:
-
+**指定出生日期**:
 ```bash
-# 指定出生日期分析所有號碼
 python analyze_results.py --birthdate 1995/03/15
+```
 
-# 分析指定的電話號碼
+**分析指定的電話號碼**:
+```bash
 python analyze_results.py --phone 0978-759-196
+```
 
-# 同時指定出生日期和電話號碼
+**同時指定出生日期和電話號碼**:
+```bash
 python analyze_results.py --birthdate 1995/03/15 --phone 0978-759-196
+```
 
-# 查看所有參數說明
+**查看所有參數說明**:
+```bash
 python analyze_results.py --help
 ```
+
+分析結果會:
+- 在螢幕上顯示排名和前3名的詳細分析
+- **自動儲存到桌面**,檔案名稱為電話號碼
+  - 單一號碼分析: `0978-759-196.txt`
+  - 多個號碼分析: 
+    - 總覽報告: `電話號碼分析總覽_N個號碼.txt`
+    - 個別報告: `0978-759-196_分析報告.txt` (每個號碼一個檔案)
 
 ### 3. 測試分析
 
@@ -131,11 +163,24 @@ print(f"推薦度: {analysis['recommendation']}")
 
 ## 檔案說明
 
+**網頁介面**:
+- `index.html`: 網頁 UI 介面,提供視覺化的分析體驗
+- `app.py`: Flask API 後端服務,處理分析請求
+
+**命令列工具**:
 - `cht_crawler.py`: 中華電信網站爬蟲,搜尋符合條件的電話號碼
 - `phone_numerology.py`: 核心分析模組,包含所有命理計算邏輯
-- `analyze_results.py`: 分析腳本,讀取找到的號碼並生成報告
-- `found_numbers.txt`: 搜尋結果(由 crawler 生成)
-- `analysis_report.txt`: 完整分析報告(由 analyze_results 生成)
+- `analyze_results.py`: 分析腳本,讀取找到的號碼並生成報告 (自動儲存到桌面)
+- `test_analysis.py`: 測試腳本,快速測試分析功能
+
+**資料檔案**:
+- `found_numbers.txt`: 搜尋結果 (由 crawler 生成)
+
+**輸出檔案** (自動儲存到桌面):
+- 單一號碼: `電話號碼.txt` (例: `0978-759-196.txt`)
+- 多個號碼: 
+  - `電話號碼分析總覽_N個號碼.txt` - 所有號碼的排名和詳細分析
+  - `電話號碼_分析報告.txt` - 每個號碼的獨立報告
 
 ## 注意事項
 

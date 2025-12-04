@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>電話號碼命理分析系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #aaa;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result h2 {
+            color: #667eea;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .result-content {
+            white-space: pre-wrap;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+        }
+
+        .info-box p {
+            color: #1976d2;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 電話號碼命理分析</h1>
+            <p>使用八大數字磁場與八十一靈動數分析您的電話號碼</p>
+        </div>
+
+        <div class="info-box">
+            <p>💡 輸入您的手機號碼和出生日期，系統將為您分析號碼的吉凶運勢</p>
+        </div>
+
+        <form id="analysisForm">
+            <div class="form-group">
+                <label for="phoneNumber">📞 手機號碼</label>
+                <input 
+                    type="text" 
+                    id="phoneNumber" 
+                    name="phoneNumber" 
+                    placeholder="例: 0978-759-196 或 0978759196"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="birthdate">🎂 出生年月日 (西元)</label>
+                <input 
+                    type="text" 
+                    id="birthdate" 
+                    name="birthdate" 
+                    placeholder="格式: YYYY/MM/DD (例: 1990/09/25)"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn" id="analyzeBtn">
+                🔮 開始分析
+            </button>
+        </form>
+
+        <div class="error" id="errorMsg"></div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #667eea;">分析中...</p>
+        </div>
+
+        <div class="result" id="result">
+            <h2>📊 分析結果</h2>
+            <div class="result-content" id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Python 後端 API (使用 Flask)
+        const API_URL = 'http://localhost:5000/analyze';
+
+        const form = document.getElementById('analysisForm');
+        const errorMsg = document.getElementById('errorMsg');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const resultContent = document.getElementById('resultContent');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // 獲取輸入值
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            const birthdate = document.getElementById('birthdate').value.trim();
+
+            // 驗證輸入
+            if (!validateInputs(phoneNumber, birthdate)) {
+                return;
+            }
+
+            // 隱藏錯誤和結果
+            errorMsg.classList.remove('show');
+            result.classList.remove('show');
+
+            // 顯示載入中
+            loading.classList.add('show');
+
+            try {
+                // 呼叫 API
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        phone_number: phoneNumber,
+                        birthdate: birthdate
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // 顯示結果
+                    resultContent.textContent = data.report;
+                    result.classList.add('show');
+                } else {
+                    // 顯示錯誤
+                    showError(data.error || '分析失敗，請稍後再試');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('無法連接到伺服器，請確認後端服務是否啟動');
+            } finally {
+                loading.classList.remove('show');
+            }
+        });
+
+        function validateInputs(phoneNumber, birthdate) {
+            // 驗證手機號碼
+            const phoneRegex = /^09\d{2}[-]?\d{3}[-]?\d{3}$/;
+            if (!phoneRegex.test(phoneNumber)) {
+                showError('手機號碼格式不正確，請輸入 09 開頭的 10 位數字');
+                return false;
+            }
+
+            // 驗證出生日期
+            const dateRegex = /^\d{4}\/\d{2}\/\d{2}$/;
+            if (!dateRegex.test(birthdate)) {
+                showError('出生日期格式不正確，請使用 YYYY/MM/DD 格式 (例: 1990/09/25)');
+                return false;
+            }
+
+            const [year, month, day] = birthdate.split('/').map(Number);
+            if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) {
+                showError('出生日期數值不正確，請檢查年月日');
+                return false;
+            }
+
+            return true;
+        }
+
+        function showError(message) {
+            errorMsg.textContent = '❌ ' + message;
+            errorMsg.classList.add('show');
+            setTimeout(() => {
+                errorMsg.classList.remove('show');
+            }, 5000);
+        }
+
+        // 自動格式化手機號碼
+        document.getElementById('phoneNumber').addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 10) {
+                value = value.slice(0, 10);
+            }
+            if (value.length >= 7) {
+                e.target.value = value.slice(0, 4) + '-' + value.slice(4, 7) + '-' + value.slice(7);
+            } else if (value.length >= 4) {
+                e.target.value = value.slice(0, 4) + '-' + value.slice(4);
+            } else {
+                e.target.value = value;
+            }
+        });
+
+        // 自動格式化日期
+        document.getElementById('birthdate').addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 8) {
+                value = value.slice(0, 8);
+            }
+            if (value.length >= 6) {
+                e.target.value = value.slice(0, 4) + '/' + value.slice(4, 6) + '/' + value.slice(6);
+            } else if (value.length >= 4) {
+                e.target.value = value.slice(0, 4) + '/' + value.slice(4);
+            } else {
+                e.target.value = value;
+            }
+        });
+    </script>
+</body>
+</html>

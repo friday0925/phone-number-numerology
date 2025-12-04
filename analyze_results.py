@@ -7,9 +7,23 @@ from phone_numerology import PhoneNumerology
 import os
 import sys
 import argparse
+from pathlib import Path
+import re
 
 
-def analyze_found_numbers(birthdate: str = "1990/09/25", phone_number: str = None):
+def get_desktop_path():
+    """獲取桌面路徑"""
+    return str(Path.home() / "Desktop")
+
+
+def sanitize_filename(phone_number: str) -> str:
+    """將電話號碼轉換為合法的檔案名稱"""
+    # 移除所有非數字和連字號的字符
+    sanitized = re.sub(r'[^0-9-]', '', phone_number)
+    return sanitized
+
+
+def analyze_found_numbers(birthdate: str = "1985/11/11", phone_number: str = None):
     """
     分析已找到的電話號碼
     
@@ -23,13 +37,19 @@ def analyze_found_numbers(birthdate: str = "1990/09/25", phone_number: str = Non
     # 如果指定了電話號碼,只分析該號碼
     if phone_number:
         print(f"📊 分析指定的電話號碼: {phone_number}\n")
-        print(analyzer.generate_report(phone_number))
+        report_content = analyzer.generate_report(phone_number)
+        print(report_content)
         
-        # 儲存報告
-        report_file = "analysis_report.txt"
+        # 儲存報告到桌面,以電話號碼命名
+        desktop_path = get_desktop_path()
+        filename = f"{sanitize_filename(phone_number)}.txt"
+        report_file = os.path.join(desktop_path, filename)
+        
         with open(report_file, 'w', encoding='utf-8') as f:
-            f.write(analyzer.generate_report(phone_number))
-        print(f"\n✅ 報告已儲存至: {report_file}")
+            f.write(report_content)
+        
+        print(f"\n✅ 報告已儲存至桌面: {filename}")
+        print(f"   完整路徑: {report_file}")
         return
     
     # 讀取找到的號碼
@@ -90,12 +110,40 @@ def analyze_found_numbers(birthdate: str = "1990/09/25", phone_number: str = Non
         print(f"{'#'*70}")
         print(analyzer.generate_report(results[i]['phone_number']))
     
-    # 儲存完整報告
-    report_file = "analysis_report.txt"
-    with open(report_file, 'w', encoding='utf-8') as f:
+    # 儲存完整報告到桌面
+    desktop_path = get_desktop_path()
+    
+    # 為每個號碼生成獨立的報告檔案
+    saved_files = []
+    for i, result in enumerate(results, 1):
+        phone_num = result['phone_number']
+        filename = f"{sanitize_filename(phone_num)}_分析報告.txt"
+        report_file = os.path.join(desktop_path, filename)
+        
+        with open(report_file, 'w', encoding='utf-8') as f:
+            f.write("="*70 + "\n")
+            f.write(f"電話號碼命理分析報告 - 排名第 {i} 名\n")
+            f.write(f"出生日期: {birthdate}\n")
+            f.write("="*70 + "\n\n")
+            f.write(analyzer.generate_report(phone_num))
+            f.write("\n\n")
+            f.write("="*70 + "\n")
+            f.write(f"綜合評分: {result['final_score']}/100\n")
+            f.write(f"推薦度: {result['recommendation']}\n")
+            f.write(f"排名: 第 {i} 名 (共 {len(results)} 個號碼)\n")
+            f.write("="*70 + "\n")
+        
+        saved_files.append(filename)
+    
+    # 同時生成一個總覽報告
+    summary_filename = f"電話號碼分析總覽_{len(results)}個號碼.txt"
+    summary_file = os.path.join(desktop_path, summary_filename)
+    
+    with open(summary_file, 'w', encoding='utf-8') as f:
         f.write("="*70 + "\n")
         f.write("電話號碼命理分析完整報告\n")
         f.write(f"出生日期: {birthdate}\n")
+        f.write(f"分析數量: {len(results)} 個號碼\n")
         f.write("="*70 + "\n\n")
         
         f.write("排名總覽\n")
@@ -118,7 +166,12 @@ def analyze_found_numbers(birthdate: str = "1990/09/25", phone_number: str = Non
             f.write(analyzer.generate_report(result['phone_number']))
             f.write("\n\n")
     
-    print(f"\n✅ 完整報告已儲存至: {report_file}")
+    print(f"\n✅ 分析報告已儲存至桌面:")
+    print(f"   📄 總覽報告: {summary_filename}")
+    print(f"   📱 個別報告: {len(saved_files)} 個檔案")
+    for filename in saved_files:
+        print(f"      - {filename}")
+    print(f"\n   完整路徑: {desktop_path}")
 
 
 if __name__ == "__main__":
@@ -144,8 +197,8 @@ if __name__ == "__main__":
     parser.add_argument(
         '--birthdate', '-b',
         type=str,
-        default='1990/09/25',
-        help='出生日期 (格式: YYYY/MM/DD, 預設: 1990/09/25)'
+        default='1963/08/20',
+        help='出生日期 (格式: YYYY/MM/DD, 預設: 1989/01/25)'
     )
     
     parser.add_argument(
