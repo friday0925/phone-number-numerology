@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>電話號碼命理分析系統</title>
+    <title>電話號碼命理分析系統 - 純前端版</title>
     <style>
         * {
             margin: 0;
@@ -26,48 +27,45 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             padding: 40px;
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
-            backdrop-filter: blur(10px);
         }
 
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .header h1 {
             color: #667eea;
-            font-size: 32px;
-            margin-bottom: 10px;
-            font-weight: 700;
+            font-size: 28px;
+            margin-bottom: 8px;
         }
 
         .header p {
             color: #666;
-            font-size: 16px;
+            font-size: 14px;
         }
 
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
             color: #333;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .form-group input {
             width: 100%;
-            padding: 15px 20px;
+            padding: 12px 15px;
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: white;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
         }
 
         .form-group input:focus {
@@ -76,42 +74,27 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .form-group input::placeholder {
-            color: #aaa;
-        }
-
         .btn {
             width: 100%;
-            padding: 15px;
+            padding: 14px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 18px;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
+            transition: all 0.3s;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
         }
 
         .result {
-            margin-top: 30px;
-            padding: 25px;
+            margin-top: 25px;
+            padding: 20px;
             background: #f8f9fa;
             border-radius: 10px;
             display: none;
@@ -119,7 +102,7 @@
 
         .result.show {
             display: block;
-            animation: fadeIn 0.5s ease;
+            animation: fadeIn 0.5s;
         }
 
         @keyframes fadeIn {
@@ -127,6 +110,7 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -135,267 +119,390 @@
 
         .result h2 {
             color: #667eea;
-            font-size: 24px;
-            margin-bottom: 20px;
+            font-size: 20px;
+            margin-bottom: 15px;
             text-align: center;
         }
 
         .result-content {
             white-space: pre-wrap;
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.6;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.5;
             color: #333;
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            max-height: 500px;
+            padding: 15px;
+            border-radius: 6px;
+            max-height: 450px;
             overflow-y: auto;
         }
 
         .error {
             background: #fee;
             color: #c33;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 12px;
             display: none;
         }
 
         .error.show {
             display: block;
-            animation: shake 0.5s ease;
+            animation: shake 0.5s;
         }
 
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
 
-        .loading {
-            text-align: center;
-            padding: 20px;
-            display: none;
-        }
+            0%,
+            100% {
+                transform: translateX(0);
+            }
 
-        .loading.show {
-            display: block;
-        }
+            25% {
+                transform: translateX(-8px);
+            }
 
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            75% {
+                transform: translateX(8px);
+            }
         }
 
         .info-box {
             background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            margin-bottom: 25px;
-            border-radius: 5px;
-        }
-
-        .info-box p {
+            border-left: 3px solid #2196f3;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 13px;
             color: #1976d2;
-            font-size: 14px;
-            margin: 5px 0;
         }
 
-        @media (max-width: 600px) {
-            .container {
-                padding: 25px;
-            }
+        .download-btn {
+            margin-top: 12px;
+            padding: 8px 16px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
 
-            .header h1 {
-                font-size: 24px;
-            }
+        .download-btn:hover {
+            background: #45a049;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
             <h1>📱 電話號碼命理分析</h1>
-            <p>使用八大數字磁場與八十一靈動數分析您的電話號碼</p>
+            <p>八大數字磁場 × 八十一靈動數 × 五行相容性</p>
         </div>
 
         <div class="info-box">
-            <p>💡 輸入您的手機號碼和出生日期，系統將為您分析號碼的吉凶運勢</p>
+            💡 純前端版本 - 無需安裝,無需後端,直接在瀏覽器中分析!
         </div>
 
         <form id="analysisForm">
             <div class="form-group">
                 <label for="phoneNumber">📞 手機號碼</label>
-                <input 
-                    type="text" 
-                    id="phoneNumber" 
-                    name="phoneNumber" 
-                    placeholder="例: 0978-759-196 或 0978759196"
-                    required
-                >
+                <input type="text" id="phoneNumber" placeholder="例: 0978-759-196 或 0978759196" required>
             </div>
 
             <div class="form-group">
                 <label for="birthdate">🎂 出生年月日 (西元)</label>
-                <input 
-                    type="text" 
-                    id="birthdate" 
-                    name="birthdate" 
-                    placeholder="格式: YYYY/MM/DD (例: 1990/09/25)"
-                    required
-                >
+                <input type="text" id="birthdate" placeholder="格式: YYYY/MM/DD (例: 1990/09/25)" required>
             </div>
 
-            <button type="submit" class="btn" id="analyzeBtn">
-                🔮 開始分析
-            </button>
+            <button type="submit" class="btn">🔮 開始分析</button>
         </form>
 
         <div class="error" id="errorMsg"></div>
 
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p style="margin-top: 15px; color: #667eea;">分析中...</p>
-        </div>
-
         <div class="result" id="result">
             <h2>📊 分析結果</h2>
             <div class="result-content" id="resultContent"></div>
+            <button class="download-btn" onclick="downloadReport()">💾 下載報告</button>
         </div>
     </div>
 
     <script>
-        // Python 後端 API (使用 Flask)
-        const API_URL = 'http://localhost:5000/analyze';
+        // 電話號碼命理分析 JavaScript 版本
+        class PhoneNumerology {
+            constructor(birthdate) {
+                const [year, month, day] = birthdate.split('/').map(Number);
+                this.birthdate = birthdate;
+                this.birthYear = year;
+                this.birthMonth = month;
+                this.birthDay = day;
+            }
 
-        const form = document.getElementById('analysisForm');
-        const errorMsg = document.getElementById('errorMsg');
-        const loading = document.getElementById('loading');
-        const result = document.getElementById('result');
-        const resultContent = document.getElementById('resultContent');
+            // 八大數字磁場定義
+            static MAGNETIC_FIELDS = {
+                '天醫': { pairs: ['13', '31', '68', '86', '49', '94', '27', '72'], meaning: '財富、智慧、正桃花、婚姻', score: 10, type: 'lucky' },
+                '生氣': { pairs: ['14', '41', '67', '76', '93', '39', '82', '28'], meaning: '貴人、樂天、人際關係', score: 9, type: 'lucky' },
+                '延年': { pairs: ['19', '91', '87', '78', '34', '43', '26', '62'], meaning: '事業、專業能力、領導力', score: 9, type: 'lucky' },
+                '伏位': { pairs: ['11', '22', '33', '44', '55', '66', '77', '88', '99'], meaning: '等待、蓄勢待發', score: 5, type: 'neutral' },
+                '絕命': { pairs: ['12', '21', '69', '96', '48', '84', '37', '73'], meaning: '投資、冒險、壓力', score: -8, type: 'unlucky' },
+                '禍害': { pairs: ['17', '71', '89', '98', '46', '64', '32', '23'], meaning: '口舌是非、小人', score: -7, type: 'unlucky' },
+                '五鬼': { pairs: ['18', '81', '97', '79', '36', '63', '24', '42'], meaning: '聰明、機智但易有意外', score: -6, type: 'unlucky' },
+                '六煞': { pairs: ['16', '61', '74', '47', '38', '83', '29', '92'], meaning: '桃花、感情波折', score: -5, type: 'unlucky' }
+            };
 
-        form.addEventListener('submit', async (e) => {
+            // 八十一靈動數對照表 (簡化版,包含主要數字)
+            static LINGDONG_81 = {
+                1: { type: '大吉', meaning: '宇宙起源,天地開泰', score: 10 }, 3: { type: '大吉', meaning: '進取如意,增進繁榮', score: 10 },
+                5: { type: '大吉', meaning: '福祿長壽,福德集門', score: 10 }, 6: { type: '吉', meaning: '安穩餘慶,吉人天相', score: 8 },
+                7: { type: '吉', meaning: '剛毅果斷,勇往直前', score: 8 }, 8: { type: '吉', meaning: '意志剛健,勤勉發展', score: 8 },
+                11: { type: '大吉', meaning: '穩健吉慶,富貴榮達', score: 10 }, 13: { type: '大吉', meaning: '智略超群,博學多才', score: 10 },
+                15: { type: '大吉', meaning: '福壽雙全,立身興家', score: 10 }, 16: { type: '大吉', meaning: '貴人相助,興家興業', score: 10 },
+                17: { type: '吉', meaning: '突破萬難,剛柔兼備', score: 8 }, 18: { type: '吉', meaning: '有志竟成,內名有運', score: 8 },
+                21: { type: '大吉', meaning: '獨立權威,明月光照', score: 10 }, 23: { type: '大吉', meaning: '旭日東升,質實剛堅', score: 10 },
+                24: { type: '大吉', meaning: '家門餘慶,金錢豐盈', score: 10 }, 25: { type: '吉', meaning: '英俊剛毅,資性聰敏', score: 8 },
+                31: { type: '大吉', meaning: '智勇得志,心想事成', score: 10 }, 32: { type: '大吉', meaning: '權貴顯達,意外惠澤', score: 10 },
+                33: { type: '大吉', meaning: '家門隆昌,才德開展', score: 10 }, 35: { type: '吉', meaning: '溫和平靜,智達通暢', score: 8 },
+                37: { type: '吉', meaning: '權威顯達,吉人天相', score: 8 }, 39: { type: '大吉', meaning: '富貴榮華,變化無窮', score: 10 },
+                41: { type: '大吉', meaning: '德高望重,事事如意', score: 10 }, 45: { type: '大吉', meaning: '順風揚帆,萬事如意', score: 10 },
+                47: { type: '大吉', meaning: '點鐵成金,開花結果', score: 10 }, 48: { type: '吉', meaning: '智謀兼備,德量榮達', score: 8 },
+                52: { type: '吉', meaning: '草木逢春,雨過天晴', score: 7 }, 57: { type: '吉', meaning: '寒雪青松,晚年昌隆', score: 7 },
+                61: { type: '吉', meaning: '名利雙收,繁榮富貴', score: 8 }, 63: { type: '吉', meaning: '萬物化育,繁榮之象', score: 8 },
+                65: { type: '大吉', meaning: '吉運自來,能享盛名', score: 10 }, 67: { type: '大吉', meaning: '富貴長壽,光明正大', score: 10 },
+                68: { type: '吉', meaning: '思慮周詳,計劃力行', score: 8 }, 81: { type: '大吉', meaning: '萬物回春,還原復始', score: 10 },
+                2: { type: '凶', meaning: '混飩未定,分離破敗', score: -5 }, 4: { type: '凶', meaning: '破敗凶變,萬事休止', score: -8 },
+                9: { type: '凶', meaning: '興盡凶始,窮乏困苦', score: -8 }, 10: { type: '凶', meaning: '萬事終局,充滿損耗', score: -8 },
+                12: { type: '凶', meaning: '意志薄弱,家庭寂寞', score: -5 }, 14: { type: '凶', meaning: '淪落天涯,失意煩悶', score: -5 },
+                19: { type: '凶', meaning: '風雲蔽月,災苦重來', score: -7 }, 20: { type: '凶', meaning: '非業破運,災禍不安', score: -7 },
+                22: { type: '凶', meaning: '秋草逢霜,兩士相爭', score: -5 }, 26: { type: '凶', meaning: '波瀾重疊,變怪奇異', score: -4 },
+                27: { type: '吉帶凶', meaning: '足智多謀,先苦後甜', score: 3 }, 28: { type: '凶', meaning: '家親緣薄,離群獨處', score: -6 },
+                29: { type: '吉', meaning: '智謀兼備,欲望難足', score: 7 }, 30: { type: '吉帶凶', meaning: '一成一敗,絕處逢生', score: 3 },
+                34: { type: '凶', meaning: '破家亡身,財命危險', score: -8 }, 36: { type: '凶', meaning: '風浪不息,俠義薄運', score: -5 },
+                40: { type: '吉帶凶', meaning: '謹慎保安,豪膽邁進', score: 3 }, 42: { type: '吉帶凶', meaning: '寒嬋在柳,十藝不成', score: 2 },
+                43: { type: '凶帶吉', meaning: '邪途散財,外祥內苦', score: -2 }, 44: { type: '凶', meaning: '須眉難展,力量有限', score: -6 },
+                46: { type: '凶', meaning: '羅網繫身,離祖成家', score: -5 }, 49: { type: '吉帶凶', meaning: '吉凶難分,不斷辛勞', score: 2 },
+                50: { type: '吉帶凶', meaning: '小舟入海,吉凶參半', score: 2 }, 51: { type: '吉帶凶', meaning: '一盛一衰,浮沉不定', score: 2 },
+                53: { type: '吉帶凶', meaning: '外祥內患,先吉後凶', score: 1 }, 54: { type: '凶', meaning: '雖傾全力,難望成功', score: -6 },
+                55: { type: '吉帶凶', meaning: '外美內苦,假面繁榮', score: 1 }, 56: { type: '凶', meaning: '缺乏實行,難望成功', score: -5 },
+                58: { type: '吉帶凶', meaning: '先苦後甘,浮沉多端', score: 2 }, 59: { type: '凶', meaning: '遇事猶疑,難望成功', score: -6 },
+                60: { type: '凶', meaning: '黑暗無光,心迷意亂', score: -7 }, 62: { type: '凶', meaning: '基礎虛弱,搖搖欲墜', score: -6 },
+                64: { type: '凶', meaning: '骨肉分離,孤兒悲愁', score: -7 }, 66: { type: '凶', meaning: '內外不和,信用缺乏', score: -5 },
+                69: { type: '凶', meaning: '動搖不安,常陷逆境', score: -6 }, 70: { type: '凶', meaning: '慘淡經營,難免貧困', score: -7 },
+                71: { type: '吉帶凶', meaning: '吉凶參半,惟賴勇氣', score: 2 }, 72: { type: '吉帶凶', meaning: '先甘後苦,不能持久', score: 1 },
+                73: { type: '吉帶凶', meaning: '盛衰交加,可守成功', score: 2 }, 74: { type: '凶', meaning: '智能不足,坐食山空', score: -6 },
+                75: { type: '吉帶凶', meaning: '先吉後凶,退守可安', score: 1 }, 76: { type: '凶帶吉', meaning: '傾覆離散,骨肉分離', score: -3 },
+                77: { type: '吉帶凶', meaning: '先苦後甘,不可倉促', score: 2 }, 78: { type: '吉帶凶', meaning: '有得有失,華而不實', score: 1 },
+                79: { type: '凶', meaning: '挽回乏力,身疲力盡', score: -7 }, 80: { type: '凶', meaning: '凶星入度,清本縮小', score: -7 }
+            };
+
+            analyzeMagneticFields(phoneNumber) {
+                const clean = phoneNumber.replace(/\D/g, '');
+                const pairs = [];
+                for (let i = 0; i < clean.length - 1; i++) {
+                    pairs.push(clean.substring(i, i + 2));
+                }
+
+                const fieldCounts = {};
+                const fieldDetails = [];
+                let totalScore = 0;
+
+                for (const pair of pairs) {
+                    for (const [fieldName, fieldInfo] of Object.entries(PhoneNumerology.MAGNETIC_FIELDS)) {
+                        if (fieldInfo.pairs.includes(pair)) {
+                            fieldCounts[fieldName] = (fieldCounts[fieldName] || 0) + 1;
+                            fieldDetails.push({ pair, field: fieldName, meaning: fieldInfo.meaning, type: fieldInfo.type, score: fieldInfo.score });
+                            totalScore += fieldInfo.score;
+                            break;
+                        }
+                    }
+                }
+
+                return { pairs, fieldCounts, fieldDetails, totalScore, averageScore: pairs.length ? totalScore / pairs.length : 0 };
+            }
+
+            calculateLingdong81(phoneNumber) {
+                const clean = phoneNumber.replace(/\D/g, '');
+                const lastDigits = clean.slice(-4);
+                const numberValue = parseInt(lastDigits);
+                const lingdongNum = (numberValue % 80) || 80;
+                const lingdongInfo = PhoneNumerology.LINGDONG_81[lingdongNum] || { type: '未知', meaning: '無資料', score: 0 };
+
+                return { lastDigits, numberValue, lingdongNumber: lingdongNum, ...lingdongInfo };
+            }
+
+            calculateFiveElements(phoneNumber) {
+                const heavenlyStems = ['庚', '辛', '壬', '癸', '甲', '乙', '丙', '丁', '戊', '己'];
+                const elementsMap = { '庚': '金', '辛': '金', '壬': '水', '癸': '水', '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土', '己': '土' };
+                const yearIndex = (this.birthYear - 4) % 10;
+                const birthElement = elementsMap[heavenlyStems[yearIndex]];
+
+                const digitElements = { '1': '木', '2': '木', '3': '火', '4': '火', '5': '土', '6': '土', '7': '金', '8': '金', '9': '水', '0': '水' };
+                const elementRelations = {
+                    '木': { 生: '火', 剋: '土', 被生: '水', 被剋: '金' }, '火': { 生: '土', 剋: '金', 被生: '木', 被剋: '水' },
+                    '土': { 生: '金', 剋: '水', 被生: '火', 被剋: '木' }, '金': { 生: '水', 剋: '木', 被生: '土', 被剋: '火' },
+                    '水': { 生: '木', 剋: '火', 被生: '金', 被剋: '土' }
+                };
+
+                const clean = phoneNumber.replace(/\D/g, '');
+                const elementCounts = {};
+                for (const digit of clean) {
+                    const elem = digitElements[digit];
+                    elementCounts[elem] = (elementCounts[elem] || 0) + 1;
+                }
+
+                let compatibilityScore = 0;
+                const elementAnalysis = [];
+                for (const [element, count] of Object.entries(elementCounts)) {
+                    let score, relation;
+                    if (element === birthElement) { score = 5 * count; relation = '同'; }
+                    else if (element === elementRelations[birthElement].生) { score = 3 * count; relation = '我生'; }
+                    else if (element === elementRelations[birthElement].被生) { score = 8 * count; relation = '生我'; }
+                    else if (element === elementRelations[birthElement].剋) { score = 2 * count; relation = '我剋'; }
+                    else { score = -3 * count; relation = '剋我'; }
+                    compatibilityScore += score;
+                    elementAnalysis.push({ element, count, relation, score });
+                }
+
+                return { birthYear: this.birthYear, birthElement, elementCounts, elementAnalysis, compatibilityScore };
+            }
+
+            comprehensiveAnalysis(phoneNumber) {
+                const magnetic = this.analyzeMagneticFields(phoneNumber);
+                const lingdong = this.calculateLingdong81(phoneNumber);
+                const fiveElements = this.calculateFiveElements(phoneNumber);
+
+                const magneticNormalized = (magnetic.averageScore + 10) / 20 * 100;
+                const lingdongNormalized = (lingdong.score + 10) / 20 * 100;
+                const elementsNormalized = Math.min(100, Math.max(0, fiveElements.compatibilityScore));
+
+                const finalScore = magneticNormalized * 0.4 + lingdongNormalized * 0.3 + elementsNormalized * 0.3;
+
+                let recommendation;
+                if (finalScore >= 80) recommendation = '★★★★★ 極力推薦';
+                else if (finalScore >= 70) recommendation = '★★★★☆ 非常適合';
+                else if (finalScore >= 60) recommendation = '★★★☆☆ 適合';
+                else if (finalScore >= 50) recommendation = '★★☆☆☆ 普通';
+                else recommendation = '★☆☆☆☆ 不推薦';
+
+                return { phoneNumber, birthdate: this.birthdate, magneticFields: magnetic, lingdong81: lingdong, fiveElements, finalScore: Math.round(finalScore * 100) / 100, recommendation };
+            }
+
+            generateReport(phoneNumber) {
+                const analysis = this.comprehensiveAnalysis(phoneNumber);
+                let report = `${'='.repeat(60)}\n電話號碼命理分析報告\n${'='.repeat(60)}\n\n`;
+                report += `📱 號碼: ${analysis.phoneNumber}\n🎂 出生日期: ${analysis.birthdate}\n\n`;
+                report += `${'─'.repeat(60)}\n【八大數字磁場分析】\n${'─'.repeat(60)}\n`;
+
+                const fieldCounts = analysis.magneticFields.fieldCounts;
+                if (Object.keys(fieldCounts).length > 0) {
+                    const sorted = Object.entries(fieldCounts).sort((a, b) => b[1] - a[1]);
+                    for (const [fieldName, count] of sorted) {
+                        const fieldInfo = PhoneNumerology.MAGNETIC_FIELDS[fieldName];
+                        report += `  • ${fieldName} (${fieldInfo.type}): 出現 ${count} 次\n    意義: ${fieldInfo.meaning}\n`;
+                    }
+                } else {
+                    report += '  無特殊磁場組合\n';
+                }
+
+                report += `\n  磁場評分: ${analysis.magneticFields.totalScore.toFixed(1)}\n\n`;
+                report += `${'─'.repeat(60)}\n【八十一靈動數分析】\n${'─'.repeat(60)}\n`;
+                report += `  末四碼: ${analysis.lingdong81.lastDigits}\n  靈動數: ${analysis.lingdong81.lingdongNumber}\n`;
+                report += `  吉凶: ${analysis.lingdong81.type}\n  意義: ${analysis.lingdong81.meaning}\n  評分: ${analysis.lingdong81.score}\n\n`;
+                report += `${'─'.repeat(60)}\n【五行相容性分析】\n${'─'.repeat(60)}\n`;
+                report += `  出生年份: ${analysis.fiveElements.birthYear} 年\n  本命五行: ${analysis.fiveElements.birthElement}\n\n  號碼五行分布:\n`;
+
+                for (const elem of analysis.fiveElements.elementAnalysis) {
+                    report += `    ${elem.element}: ${elem.count} 個 (${elem.relation}) - 得分: ${elem.score}\n`;
+                }
+
+                report += `\n  五行相容評分: ${analysis.fiveElements.compatibilityScore}\n\n`;
+                report += `${'='.repeat(60)}\n【綜合評分】\n${'='.repeat(60)}\n`;
+                report += `  總分: ${analysis.finalScore}/100\n  推薦度: ${analysis.recommendation}\n${'='.repeat(60)}\n`;
+
+                return report;
+            }
+        }
+
+        // UI 控制
+        let currentReport = '';
+
+        document.getElementById('analysisForm').addEventListener('submit', (e) => {
             e.preventDefault();
 
-            // 獲取輸入值
             const phoneNumber = document.getElementById('phoneNumber').value.trim();
             const birthdate = document.getElementById('birthdate').value.trim();
 
-            // 驗證輸入
-            if (!validateInputs(phoneNumber, birthdate)) {
-                return;
-            }
+            if (!validateInputs(phoneNumber, birthdate)) return;
 
-            // 隱藏錯誤和結果
-            errorMsg.classList.remove('show');
-            result.classList.remove('show');
-
-            // 顯示載入中
-            loading.classList.add('show');
+            document.getElementById('errorMsg').classList.remove('show');
+            document.getElementById('result').classList.remove('show');
 
             try {
-                // 呼叫 API
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        phone_number: phoneNumber,
-                        birthdate: birthdate
-                    })
-                });
+                const analyzer = new PhoneNumerology(birthdate);
+                const report = analyzer.generateReport(phoneNumber);
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    // 顯示結果
-                    resultContent.textContent = data.report;
-                    result.classList.add('show');
-                } else {
-                    // 顯示錯誤
-                    showError(data.error || '分析失敗，請稍後再試');
-                }
+                currentReport = report;
+                document.getElementById('resultContent').textContent = report;
+                document.getElementById('result').classList.add('show');
             } catch (error) {
-                console.error('Error:', error);
-                showError('無法連接到伺服器，請確認後端服務是否啟動');
-            } finally {
-                loading.classList.remove('show');
+                showError('分析過程發生錯誤: ' + error.message);
             }
         });
 
         function validateInputs(phoneNumber, birthdate) {
-            // 驗證手機號碼
-            const phoneRegex = /^09\d{2}[-]?\d{3}[-]?\d{3}$/;
-            if (!phoneRegex.test(phoneNumber)) {
-                showError('手機號碼格式不正確，請輸入 09 開頭的 10 位數字');
+            if (!/^09\d{2}[-]?\d{3}[-]?\d{3}$/.test(phoneNumber)) {
+                showError('手機號碼格式不正確,請輸入 09 開頭的 10 位數字');
                 return false;
             }
-
-            // 驗證出生日期
-            const dateRegex = /^\d{4}\/\d{2}\/\d{2}$/;
-            if (!dateRegex.test(birthdate)) {
-                showError('出生日期格式不正確，請使用 YYYY/MM/DD 格式 (例: 1990/09/25)');
+            if (!/^\d{4}\/\d{2}\/\d{2}$/.test(birthdate)) {
+                showError('出生日期格式不正確,請使用 YYYY/MM/DD 格式');
                 return false;
             }
-
             const [year, month, day] = birthdate.split('/').map(Number);
             if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) {
-                showError('出生日期數值不正確，請檢查年月日');
+                showError('出生日期數值不正確');
                 return false;
             }
-
             return true;
         }
 
         function showError(message) {
+            const errorMsg = document.getElementById('errorMsg');
             errorMsg.textContent = '❌ ' + message;
             errorMsg.classList.add('show');
-            setTimeout(() => {
-                errorMsg.classList.remove('show');
-            }, 5000);
+            setTimeout(() => errorMsg.classList.remove('show'), 5000);
         }
 
-        // 自動格式化手機號碼
+        function downloadReport() {
+            const blob = new Blob([currentReport], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const phoneNumber = document.getElementById('phoneNumber').value.replace(/\D/g, '');
+            a.href = url;
+            a.download = `${phoneNumber}_分析報告.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // 自動格式化
         document.getElementById('phoneNumber').addEventListener('input', (e) => {
             let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 10) {
-                value = value.slice(0, 10);
-            }
-            if (value.length >= 7) {
-                e.target.value = value.slice(0, 4) + '-' + value.slice(4, 7) + '-' + value.slice(7);
-            } else if (value.length >= 4) {
-                e.target.value = value.slice(0, 4) + '-' + value.slice(4);
-            } else {
-                e.target.value = value;
-            }
+            if (value.length > 10) value = value.slice(0, 10);
+            if (value.length >= 7) e.target.value = value.slice(0, 4) + '-' + value.slice(4, 7) + '-' + value.slice(7);
+            else if (value.length >= 4) e.target.value = value.slice(0, 4) + '-' + value.slice(4);
+            else e.target.value = value;
         });
 
-        // 自動格式化日期
         document.getElementById('birthdate').addEventListener('input', (e) => {
             let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 8) {
-                value = value.slice(0, 8);
-            }
-            if (value.length >= 6) {
-                e.target.value = value.slice(0, 4) + '/' + value.slice(4, 6) + '/' + value.slice(6);
-            } else if (value.length >= 4) {
-                e.target.value = value.slice(0, 4) + '/' + value.slice(4);
-            } else {
-                e.target.value = value;
-            }
+            if (value.length > 8) value = value.slice(0, 8);
+            if (value.length >= 6) e.target.value = value.slice(0, 4) + '/' + value.slice(4, 6) + '/' + value.slice(6);
+            else if (value.length >= 4) e.target.value = value.slice(0, 4) + '/' + value.slice(4);
+            else e.target.value = value;
         });
     </script>
 </body>
+
 </html>
